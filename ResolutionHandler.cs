@@ -1,59 +1,93 @@
-using System.Collections;
+using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 
 public class ResolutionHandler : MonoBehaviour
 {
-    public TMP_Dropdown resolutionDropdown; // Reference to the resolution TextMeshPro Dropdown object
-    public TMP_Dropdown fullscreenDropdown; // Reference to the fullscreen TextMeshPro Dropdown object
+    public TMP_Dropdown resolutionDropdown;
+    public Toggle fullscreenToggle;
 
-    Resolution[] resolutions;
+    private bool isDropdownPopulated = false; // Track if dropdown options are already populated
 
     void Start()
     {
-        // Get available screen resolutions and populate the resolution dropdown options
-        resolutions = Screen.resolutions;
-        resolutionDropdown.ClearOptions();
-        fullscreenDropdown.ClearOptions();
+        LoadSettings(); // Load resolution and fullscreen/windowed settings on start
+    }
 
-        foreach (Resolution res in resolutions)
+    void PopulateResolutionsDropdown()
+    {
+        // Get available resolutions
+        Resolution[] resolutions = Screen.resolutions;
+
+        // Clear existing options
+        resolutionDropdown.ClearOptions();
+
+        // Create a list of resolution strings in the format "Width x Height"
+        var resolutionOptions = new List<string>();
+        foreach (var resolution in resolutions)
         {
-            resolutionDropdown.options.Add(new TMP_Dropdown.OptionData(res.width + "x" + res.height));
+            resolutionOptions.Add(resolution.width + " x " + resolution.height);
         }
 
-        // Populate the fullscreen dropdown options
-        fullscreenDropdown.options.Add(new TMP_Dropdown.OptionData("Fullscreen"));
-        fullscreenDropdown.options.Add(new TMP_Dropdown.OptionData("Windowed"));
+        // Add resolution options to the dropdown
+        resolutionDropdown.AddOptions(resolutionOptions);
 
-        // Add listeners for when the value of each dropdown changes
-        resolutionDropdown.onValueChanged.AddListener(delegate {
-            ResolutionDropdownValueChanged(resolutionDropdown);
-        });
-
-        fullscreenDropdown.onValueChanged.AddListener(delegate {
-            FullscreenDropdownValueChanged(fullscreenDropdown);
-        });
+        // Set the flag to true since the dropdown options are now populated
+        isDropdownPopulated = true;
     }
 
-    void ResolutionDropdownValueChanged(TMP_Dropdown change)
+    void LoadSettings()
     {
-        int selectedIndex = change.value;
-        Resolution selectedResolution = resolutions[selectedIndex];
+        // Load resolution and fullscreen/windowed setting from PlayerPrefs
+        string savedResolution = PlayerPrefs.GetString("Resolution", "");
+        int fullscreenSetting = PlayerPrefs.GetInt("Fullscreen", 1);
 
-        // Apply the selected resolution
-        Screen.SetResolution(selectedResolution.width, selectedResolution.height, GetFullscreenMode());
+        // Check if the dropdown options haven't been populated yet
+        if (!isDropdownPopulated)
+        {
+            PopulateResolutionsDropdown(); // Dynamically populate resolution options
+        }
+
+        // Set the dropdown value to the saved resolution if it exists in the dropdown options
+        int resolutionIndex = resolutionDropdown.options.FindIndex(option => option.text == savedResolution);
+        resolutionDropdown.value = (resolutionIndex != -1) ? resolutionIndex : 0;
+
+        // Set fullscreen/windowed toggle
+        fullscreenToggle.isOn = (fullscreenSetting == 1);
+
+        // Apply the loaded settings
+        ApplyResolution();
     }
 
-    void FullscreenDropdownValueChanged(TMP_Dropdown change)
+    // Call this method when the user changes the resolution from the dropdown
+    public void OnResolutionChanged()
     {
-        // Apply fullscreen or windowed mode based on the fullscreen dropdown selection
-        Screen.SetResolution(Screen.width, Screen.height, GetFullscreenMode());
+        ApplyResolution();
     }
 
-    FullScreenMode GetFullscreenMode()
+    // Call this method when the user toggles fullscreen/windowed
+    public void OnFullscreenToggle()
     {
-        // Determine the selected fullscreen mode from the dropdown value
-        return (fullscreenDropdown.value == 0) ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+        ApplyResolution();
+    }
+
+    // Apply the selected resolution and fullscreen/windowed setting
+    private void ApplyResolution()
+    {
+        // Get the selected resolution from the dropdown
+        string selectedResolution = resolutionDropdown.options[resolutionDropdown.value].text;
+
+        // Parse the resolution string (assuming it's in the format "Width x Height")
+        string[] resolutionParts = selectedResolution.Split('x');
+        int width = int.Parse(resolutionParts[0]);
+        int height = int.Parse(resolutionParts[1]);
+
+        // Set the resolution
+        Screen.SetResolution(width, height, fullscreenToggle.isOn);
+
+        // Save the selected resolution and fullscreen/windowed setting in PlayerPrefs
+        PlayerPrefs.SetString("Resolution", selectedResolution);
+        PlayerPrefs.SetInt("Fullscreen", fullscreenToggle.isOn ? 1 : 0);
     }
 }

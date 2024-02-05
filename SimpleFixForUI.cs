@@ -14,8 +14,9 @@ public class SimpleFixForUI : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player")) {
-            SceneManager.LoadScene(3);
-            Debug.Log("loaded final scene");
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            SceneManager.LoadScene(2);
         }    
     }
 

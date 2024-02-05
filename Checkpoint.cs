@@ -16,8 +16,8 @@ public class Checkpoint : MonoBehaviour
             CheckpointManager.SavePlayerData(transform.position, true);
             
             // Destroy the object after saving
-            // Destroy(gameObject);
             Debug.Log("DATA IS SAVED");
+            Destroy(gameObject);
         }
     }
 }

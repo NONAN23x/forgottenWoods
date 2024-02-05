@@ -19,12 +19,12 @@ public class AudioManager : MonoBehaviour {
             return;
         }
 
-        DontDestroyOnLoad(gameObject);
+        // DontDestroyOnLoad(gameObject);
 
         foreach (Sounds s in sounds) {
             s.source = gameObject.AddComponent<AudioSource>();
             s.source.clip = s.clip;
-            s.source.spatialBlend = 0.9f;
+            s.source.spatialBlend = 0f;
             s.source.volume = s.volume;
             s.source.loop = s.loop;
         }

@@ -20,8 +20,9 @@ public class LevelManager : MonoBehaviour
     // }
 
     void Awake () {
-        QualitySettings.vSyncCount = 1;
-        // Application.targetFrameRate = 75;
+        // QualitySettings.vSyncCount = 1;
+        Application.targetFrameRate = 75;
+        QualitySettings.resolutionScalingFixedDPIFactor = 0.5f;
 
     }
 

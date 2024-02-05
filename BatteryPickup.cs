@@ -8,8 +8,10 @@ public class BatteryPickup : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if (other.gameObject.name == "Player") {
-            other.GetComponentInChildren<FlashLightSystem>().RestoreLightAngle(restoreAngle);
-            other.GetComponentInChildren<FlashLightSystem>().RestoreLightIntensity(addIntensity);
+            FindObjectOfType<FlashLightSystem>().RestoreLightAngle(restoreAngle);
+            FindObjectOfType<FlashLightSystem>().RestoreLightIntensity(addIntensity);
+
+            Destroy(gameObject);
         }
     }
 }
